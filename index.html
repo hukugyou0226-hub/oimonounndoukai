@@ -1,0 +1,74 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>おいもの運動会</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3e8d2;--fg:#1c1626;--card:#fff8e8;--acc:#b5532f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#f3e8d2;--fg:#1c1626;--card:#fff8e8;--acc:#b5532f}}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--fg);font-family:'DotGothic16',system-ui,sans-serif}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#app{max-width:420px;margin:0 auto;padding:10px 12px 24px;box-sizing:border-box;text-align:center}
+h1{font-size:30px;margin:18px 0 4px;letter-spacing:2px;color:var(--acc);text-shadow:2px 2px 0 #fff}
+.sub{font-size:13px;opacity:.75;margin-bottom:14px;line-height:1.8}
+.btn{border:3px solid #1c1626;border-radius:10px;background:var(--card);color:#1c1626;font-family:inherit;font-size:18px;touch-action:manipulation;cursor:pointer;padding:10px 26px;margin:5px}
+.btn:active{transform:translateY(2px)}
+.big{font-size:22px;padding:14px 40px;user-select:none;-webkit-user-select:none}
+canvas{width:100%;max-width:380px;height:auto;image-rendering:pixelated;border:3px solid #1c1626;border-radius:8px;background:#4a9a4e;display:block;margin:6px auto}
+.box{background:var(--card);border:3px solid #1c1626;border-radius:12px;padding:12px;margin:10px 0}
+.hi{font-size:13px;color:var(--acc);margin:6px 0}
+.rank{font-size:15px;line-height:2;text-align:left;display:inline-block}
+.res{font-size:17px;min-height:26px;margin:6px 0}
+</style></head><body><div id="app"></div>
+<script>
+const $=id=>document.getElementById(id);
+const KEY='oimo_undokai_hi_v1';let hi=0;try{hi=+localStorage.getItem(KEY)||0}catch(e){}
+let ac=null;const tone=(f,d,t)=>{try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=t||'square';o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(ac.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.stop(ac.currentTime+d)}catch(e){}};
+const sfx=n=>({click:()=>tone(660,.06),win:()=>{tone(660,.1);setTimeout(()=>tone(880,.14),90)},go:()=>tone(990,.3)}[n]||(()=>0))();
+function spr(rows,pal,s){const c=document.createElement('canvas');c.width=rows[0].length*s;c.height=rows.length*s;const g=c.getContext('2d');rows.forEach((r,y)=>[...r].forEach((ch,x)=>{if(pal[ch]){g.fillStyle=pal[ch];g.fillRect(x*s,y*s,s,s)}}));return c}
+const BASE=["................","VV..KKKKKKKK..VV","VVVKBBBBBBBBKVVV","vvKBBBBBBBBBBKvv","vKBBBSBBBBSBBBKv","BKBBSSBBBBSSBBKB","BKBSSSSSSSSSSBKB","BKBSKWSSSSKWSBKB","BKBSKKSSSSKKSBKB",".KBPPSSMMSSPPBK.","..KBSSSSSSSSBK..","...KRRGGGGRRK.K.","..KJKTTRRTTKJKBK","...KQQQQQQQQKBBK","..KQQQWQQWQQQKKK","....KXK..KSK...."];
+const PAL={K:'#2a2030',B:'#c6bfc3',S:'#ffe3d0',W:'#fff',R:'#2a2030',P:'#ffb0b8',M:'#e8527a',G:'#b58aff',T:'#fff',Q:'#f2cf5a',V:'#8f4de6',v:'#5b2aa8',J:'#8f55e8',X:'#4a4650',D:'#6b5a5a'};
+const ARC=[[7,4,'S'],[7,5,'K'],[7,10,'K'],[7,11,'S'],[8,4,'K'],[8,5,'S'],[8,10,'S'],[8,11,'K']];
+const FACE={n:[],hungry:[[10,7,'M'],[10,8,'M']],yum:ARC,gold:ARC.concat([[9,6,'M'],[9,9,'M'],[10,7,'M'],[10,8,'M']]),worry:[[10,6,'M'],[10,9,'M']],
+burnt:[[6,4,'D'],[6,5,'D'],[6,10,'D'],[6,11,'D'],[9,3,'D'],[9,4,'D'],[9,11,'D'],[9,12,'D'],[10,7,'M'],[10,8,'M']]};
+const KP='#1a1208';
+const CH=[null,
+ {n:'みずいろむすめ',happy:[[7,4,'S'],[7,5,'S'],[7,10,'S'],[7,11,'S'],[8,5,'E'],[8,10,'E']],pal:{K:'#2a2030',H:'#8fd8f5',S:'#ffe3d0',E:'#6b6468',W:'#fff',P:'#ffb0b8',M:'#e8527a',C:'#2a2030',J:'#8f55e8',j:'#f0d060',T:'#fff',Y:'#f2cf5a',X:'#4a4650',Z:'#fff'},rows:[".......KK.......", "....KKHHHHKK....", "...KHHHHHHHHK...", "..KHHHHHHHHHHK..", ".KHHHHHHHHHHHHK.", ".KHHHHHHHHHHHHK.", ".KHHSSSSSSSSHHK.", ".KHSEESSSSEESHK.", ".KHSEWSSSSWESHK.", ".KHPPSSMMSSPPHK.", "..KHSSSSSSSSHK..", "...KKCCCCCCKK...", "..KJJTTTTTTJJK..", "..KjjTSSSSTjjK..", "...KYYYYYYYYK...", "...KXXK..KZZK..."]},
+ {n:'うさぎむすめ',pal:{K:KP,B:'#f4eef8',S:'#ffd9b8',W:'#fff',R:'#ff9a3c',E:'#ffb3d0',P:'#ff9fb8',M:'#d8506e',G:'#7ed957',T:'#ffd6e6',Q:'#c7a8ff'},rows:["...KK......KK...","..KEEK....KEEK..","..KEEKKKKKKEEK..","..KBBBBBBBBBBK..",".KBBBSBBBBSBBBK.",".KBBSSBBBBSSBBK.",".KBSSSSSSSSSSBK.",".KBSKWSSSSKWSBK.",".KBSKKSSSSKKSBK.",".KBPPSSMMSSPPBK.","..KBSSSSSSSSBK..","...KRRGGGGRRK...","..KSKTTRRTTKSK..","...KQQQQQQQQK...","..KQQQWQQWQQQK..","....KSK..KSK...."]},
+ {n:'きつねむすめ',pal:{K:KP,B:'#e8832b',O:'#e8832b',S:'#ffd9b8',W:'#fff',R:'#c94a2a',E:'#fff0d8',M:'#d8506e',G:'#ffe27a',T:'#ffd6a8',Q:'#8fe0b0'},rows:[".KK..........KK.",".KEK........KEK.",".KEEKKKKKKKKEEK.","..KBBBBBBBBBBK..",".KBBBSBBBBSBBBK.",".KBBSSBBBBSSBBK.",".KBSSSSSSSSSSBK.",".KBSKWSSSSKWSBK.",".KBSKKSSSSKKSBK.",".KBWWSSMMSSWWBK.","..KBSSSSSSSSBK..","...KRRGGGGRRK.K.","..KSKTTRRTTKSKOK","...KQQQQQQQQKOOK","..KQQQWQQWQQQKWK","....KSK..KSK...."]}];
+const HAPPY=[[7,4,'S'],[7,5,'S'],[7,10,'S'],[7,11,'S']];
+const imgC={};function img(v,m){const k=v+m;if(!imgC[k]){const c=CH[v],r=(v?c.rows:BASE).map(s=>s.split(''));(v?(m==='gold'?(c.happy||HAPPY):[]):FACE[m]).forEach(([y,x,ch])=>r[y][x]=ch);imgC[k]=spr(r.map(a=>a.join('')),v?c.pal:PAL,2)}return imgC[k]}
+const nm=i=>i?CH[i].n:'おいも';
+const app=$('app');let offKey=()=>{};
+function title(){offKey();
+ app.innerHTML='<h1>おいもの運動会</h1><div class="sub">おいもと なかまたちの かけっこたいかい!<br>ボタンを れんだして 1ばんで ゴールしよう</div><canvas id="tc" width="216" height="76"></canvas><div class="box" style="font-size:13px;line-height:1.9">1い 30てん / 2い 20てん<br>3い 10てん / 4い 5てん<br>(Space・Z・タップ で れんだ)</div><div class="hi">ハイスコア: '+(hi?hi+'てん':'まだ ありません')+'</div><button class="btn big" id="go">スタート!</button>';
+ const g=$('tc').getContext('2d');g.imageSmoothingEnabled=false;g.fillStyle='#4a9a4e';g.fillRect(0,0,216,76);g.fillStyle='#e6c88f';g.fillRect(0,38,216,34);
+ [0,1,2,3].forEach(i=>g.drawImage(img(i,i?'n':'gold'),14+i*50,38));
+ g.fillStyle='#fff';for(let i=0;i<9;i++){g.fillRect(i*24+4,6,12,8);g.fillStyle=i%2?'#e85a4f':'#ffd24a'}
+ $('go').onclick=()=>{sfx('click');race()}}
+function race(){offKey();
+ app.innerHTML='<div style="font-size:18px">おいもの運動会</div><div style="font-size:12px;margin:3px 0 4px">ボタンを れんだして はしれ! (▶が おいも)</div><canvas id="cv" width="216" height="172"></canvas><button class="btn big" id="run">はしれ!</button><div class="res" id="res"></div><button class="btn" id="quit" style="font-size:12px;padding:6px 12px">やめる</button>';
+ const cv=$('cv'),g=cv.getContext('2d');g.imageSmoothingEnabled=false;
+ const L=150,K=L/170,SEQ=['hungry','worry','yum','n'];
+ const dogs=[0,1,2,3].map(i=>({x:0,v:0,fin:0,m:'n',base:32+Math.random()*16}));
+ let boost=0,raf=0,last=0,state='count',cd=3.2,order=[],tw=0,lastN=4,taps=0;
+ const draw=()=>{g.fillStyle='#4a9a4e';g.fillRect(0,0,216,172);
+  dogs.forEach((d,i)=>{const y=6+i*41;g.fillStyle=i%2?'#d9b87a':'#e6c88f';g.fillRect(0,y,216,38);g.fillStyle='#fff';g.fillRect(8+L+34,y,3,38);g.fillStyle='#1c1626';g.fillRect(8+L+37,y,3,38);
+   g.drawImage(img(i,d.m),8+d.x,y+5+((state==='run'&&!d.fin&&Math.floor(tw*10+i)%2)?-2:0));
+   if(i===0){g.fillStyle='#e85a4f';g.font='bold 9px sans-serif';g.fillText('▶',0,y+19)}});
+  if(state==='count'){g.fillStyle='#fff';g.strokeStyle='#1c1626';g.lineWidth=3;g.font='bold 40px sans-serif';g.textAlign='center';const s=cd>0.4?String(Math.ceil(cd-0.2)):'GO!';g.strokeText(s,108,100);g.fillText(s,108,100);g.textAlign='left'}};
+ const loop=t=>{if(!last)last=t;const dt=Math.min(50,t-last)/1000;last=t;tw+=dt;
+  if(state==='count'){cd-=dt;const n=Math.ceil(cd-0.2);if(n!==lastN&&n>=1&&n<=3){lastN=n;sfx('click')}if(cd<=0){state='run';sfx('go')}}
+  else if(state==='run'){boost*=Math.exp(-1.3*dt);dogs[0].v=22+boost;
+   dogs.forEach((d,i)=>{if(d.fin)return;if(i)d.v=d.base+Math.sin(tw*2+i*2)*7;d.x+=d.v*dt*K;if(d.x>=L){d.x=L;d.fin=order.length+1;order.push(i);d.m=i?'gold':'burnt'}});
+   if(dogs[0].fin||order.length>=3){const rank=dogs[0].fin||4;state='done';if(rank===4)dogs[0].m='worry';const sc=[30,20,10,5][rank-1];$('res').textContent=rank+'いで ゴール! '+sc+'てん';sfx(rank<=2?'win':'click');setTimeout(()=>{cancelAnimationFrame(raf);offKey();result(order,rank,sc)},1600)}}
+  draw();raf=requestAnimationFrame(loop)};
+ const tap=()=>{if(state==='run'){boost=Math.min(60,boost+8);dogs[0].m=SEQ[taps++%SEQ.length];tone(520+(taps%4)*60,.04)}};
+ const key=e=>{if(!e.repeat&&(e.code==='Space'||e.code==='Enter'||e.code==='KeyZ')){e.preventDefault();tap()}};
+ document.addEventListener('keydown',key);offKey=()=>{cancelAnimationFrame(raf);document.removeEventListener('keydown',key)};
+ $('run').addEventListener('pointerdown',e=>{e.preventDefault();tap()});$('quit').onclick=()=>{offKey();title()};raf=requestAnimationFrame(loop)}
+function result(order,rank,sc){
+ let msg='スコア '+sc+'てん!';if(sc>hi){hi=sc;msg+=' ハイスコア!';try{localStorage.setItem(KEY,String(hi))}catch(e){}}
+ const list=order.map((i,n)=>(n+1)+'い '+(i===0?'▶ ':'')+nm(i)).join('<br>')+(rank===4?'<br>4い ▶ '+nm(0):'');
+ const medal=rank===1?'🥇 ゆうしょう!':rank===2?'🥈 おしい!':rank===3?'🥉 がんばった!':'ざんねん… つぎは がんばろう';
+ app.innerHTML='<h1 style="font-size:24px">おいもの運動会</h1><div class="box"><div style="font-size:20px;margin-bottom:8px">'+medal+'</div><div class="rank">'+list+'</div><div class="res">'+msg+'</div><div class="hi">ハイスコア: '+hi+'てん</div></div><button class="btn" id="again">もういちど</button><button class="btn" id="home">タイトルへ</button>';
+ $('again').onclick=()=>{sfx('click');race()};$('home').onclick=title}
+title();
+</script></body></html>
